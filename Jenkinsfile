@@ -2,25 +2,22 @@ pipeline {
    agent any 
 
     tools {
-        maven 'maven3'  
-        jdk 'jdk17'
+        maven 'Maven'
     }
 
     stages {
         
-        stage('Checkout') {
+        stage('Clone Repo') {
             steps {
-                git url: 'https://github.com/kaitsanchez/springboot-jenkins-midterm.git', branch: 'main'
+                git url: 'https://github.com/kaitsanchez/gs-spring-boot.git', branch: 'main'
             }
         }
-        stage('Build') {
+        stage('Build JAR') {
             steps {
-                script {
                     sh 'mvn clean package -DskipTests'
-                }
             }
         }
-        stage('Test') {
+        stage('Upload to Nexus') {
             steps {
                 script {
                     sh 'mvn test'
@@ -29,7 +26,10 @@ pipeline {
         }
         stage('Archive JAR') {
             steps {
-                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+                withCredentials([usernamePassword:$PASSWORD --upload-file target/*.jar \
+                http://localhost:8081/repository/maven-releases
+                """
+                }
             }
         }
     }
